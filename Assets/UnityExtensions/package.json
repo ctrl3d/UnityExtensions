@@ -1,0 +1,21 @@
+﻿{
+  "name": "work.ctrl3d.unity-extensions",
+  "version": "0.1.0",
+  "displayName": "UnityExtensions",
+  "description": "",
+  "unity": "2022.3",
+  "documentationUrl": "https://ctrl3d.github.io/UnityExtensions",
+  "changelogUrl": "https://github.com/ctrl3d/UnityExtensions/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/ctrl3d/UnityExtensions/blob/main/LICENSE",
+  "dependencies": {
+  },
+  "keywords": [
+    "unity",
+    "extensions"
+  ],
+  "author": {
+    "name": "Seungmin Lee",
+    "email": "ctrl3d@gmail.com",
+    "url": "https://ctrl3d.work"
+  }
+}

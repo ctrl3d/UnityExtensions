@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Extensions
+namespace work.ctrl3d
 {
     public static class RectTransformExtensions
     {
