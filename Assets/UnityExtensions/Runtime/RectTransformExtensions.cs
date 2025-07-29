@@ -49,9 +49,9 @@ namespace work.ctrl3d
             }
         }
 
-        public static void RestoreFromBackup(this RectTransform rectTransform)
+        private static void RestoreFromBackup(this RectTransform rectTransform)
         {
-            if (!_backupData.TryGetValue(rectTransform, out var backup)) return;
+            if (!BackupData.TryGetValue(rectTransform, out var backup)) return;
             rectTransform.anchoredPosition = backup.anchoredPosition;
             rectTransform.sizeDelta = backup.sizeDelta;
             rectTransform.anchorMin = backup.anchorMin;
@@ -60,31 +60,26 @@ namespace work.ctrl3d
             rectTransform.localScale = backup.localScale;
         }
 
-        public static bool HasBackup(this RectTransform rectTransform) => _backupData.ContainsKey(rectTransform);
-        public static void ClearBackup(this RectTransform rectTransform) => _backupData.Remove(rectTransform);
+        private static bool HasBackup(this RectTransform rectTransform) => BackupData.ContainsKey(rectTransform);
+        private static void ClearBackup(this RectTransform rectTransform) => BackupData.Remove(rectTransform);
 
-        public static void BackupState(this RectTransform rectTransform)
+        private static void BackupState(this RectTransform rectTransform)
         {
-            _backupData[rectTransform] = new RectTransformBackup(rectTransform);
+            BackupData[rectTransform] = new RectTransformBackup(rectTransform);
         }
 
-        private static Dictionary<RectTransform, RectTransformBackup> _backupData = new();
+        private static readonly Dictionary<RectTransform, RectTransformBackup> BackupData = new();
 
-        public static void SetSize(this RectTransform rectTransform, float width, float height)
+        public static void SetSizeDelta(this RectTransform rectTransform, float width, float height)
         {
             rectTransform.sizeDelta = new Vector2(width, height);
         }
 
-        public static void SetSize(this RectTransform rectTransform, Vector2 size)
+        public static void SetSizeDelta(this RectTransform rectTransform, Vector2 size)
         {
             rectTransform.sizeDelta = size;
         }
-
-        public static void SetSize(this RectTransform rectTransform, Vector3 size)
-        {
-            rectTransform.sizeDelta = size;
-        }
-
+        
         public static void SetWidth(this RectTransform rectTransform, float width)
         {
             rectTransform.sizeDelta = new Vector2(width, rectTransform.sizeDelta.y);
@@ -95,22 +90,22 @@ namespace work.ctrl3d
             rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, height);
         }
 
-        public static void SetPosition(this RectTransform rectTransform, Vector2 position)
+        public static void SetAnchoredPosition(this RectTransform rectTransform, Vector2 position)
         {
             rectTransform.anchoredPosition = position;
         }
-
-        public static void SetPosition(this RectTransform rectTransform, Vector3 position)
+        
+        public static void SetAnchoredPosition(this RectTransform rectTransform, float x, float y)
+        {
+            rectTransform.anchoredPosition = new Vector2(x, y);
+        }
+        
+        public static void SetAnchoredPosition3D(this RectTransform rectTransform, Vector3 position)
         {
             rectTransform.anchoredPosition3D = position;
         }
 
-        public static void SetPosition(this RectTransform rectTransform, float x, float y)
-        {
-            rectTransform.anchoredPosition = new Vector2(x, y);
-        }
-
-        public static void SetPosition(this RectTransform rectTransform, float x, float y, float z)
+        public static void SetAnchoredPosition3D(this RectTransform rectTransform, float x, float y, float z)
         {
             rectTransform.anchoredPosition3D = new Vector3(x, y, z);
         }
@@ -239,7 +234,7 @@ namespace work.ctrl3d
             rectTransform.pivot = pivot;
         }
 
-        public static void ResetRectTransform(this RectTransform rectTransform)
+        public static void Reset(this RectTransform rectTransform)
         {
             rectTransform.anchoredPosition = Vector2.zero;
             rectTransform.sizeDelta = Vector2.zero;
@@ -281,18 +276,23 @@ namespace work.ctrl3d
             rectTransform.anchorMax = new Vector2(maxX, maxY);
         }
 
-        public static void SetOffsetFromPosition(this RectTransform rectTransform, float offsetX, float offsetY)
+        public static void SetOffsetFromAnchoredPosition(this RectTransform rectTransform, float offsetX, float offsetY)
         {
             var newPosition = rectTransform.anchoredPosition + new Vector2(offsetX, offsetY);
             rectTransform.anchoredPosition = newPosition;
         }
 
-        public static void SetOffsetFromPosition(this RectTransform rectTransform, Vector2 offset)
+        public static void SetOffsetFromAnchoredPosition(this RectTransform rectTransform, Vector2 offset)
         {
             rectTransform.anchoredPosition += offset;
         }
+        
+        public static void SetLocalScale(this RectTransform rectTransform, Vector3 localScale)
+        {
+            rectTransform.localScale = localScale;
+        }
 
-        public static void SetScale(this RectTransform rectTransform, float scaleX, float scaleY, float scaleZ = 1f)
+        public static void SetLocalScale(this RectTransform rectTransform, float scaleX, float scaleY, float scaleZ = 1f)
         {
             rectTransform.localScale = new Vector3(scaleX, scaleY, scaleZ);
         }
@@ -302,7 +302,7 @@ namespace work.ctrl3d
             rectTransform.rotation = Quaternion.Euler(0, 0, angle);
         }
 
-        public static void SetPositionRelativeToParent(this RectTransform rectTransform, Vector2 relativePosition)
+        public static void SetAnchoredPositionRelativeToParent(this RectTransform rectTransform, Vector2 relativePosition)
         {
             if (rectTransform.parent is not RectTransform parentRectTransform) return;
             var parentSize = parentRectTransform.rect.size;

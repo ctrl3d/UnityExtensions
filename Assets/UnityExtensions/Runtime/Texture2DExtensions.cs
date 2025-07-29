@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace VSUnityLib.Extensions
+namespace work.ctrl3d
 {
     public static class Texture2DExtensions
     {
