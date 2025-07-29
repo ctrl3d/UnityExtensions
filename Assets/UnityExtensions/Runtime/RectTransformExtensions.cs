@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,6 +27,48 @@ namespace work.ctrl3d
             RightBottom,
             RightStretch,
         }
+
+        [Serializable]
+        public struct RectTransformBackup
+        {
+            public Vector2 anchoredPosition;
+            public Vector2 sizeDelta;
+            public Vector2 anchorMin;
+            public Vector2 anchorMax;
+            public Vector2 pivot;
+            public Vector3 localScale;
+
+            public RectTransformBackup(RectTransform rectTransform)
+            {
+                anchoredPosition = rectTransform.anchoredPosition;
+                sizeDelta = rectTransform.sizeDelta;
+                anchorMin = rectTransform.anchorMin;
+                anchorMax = rectTransform.anchorMax;
+                pivot = rectTransform.pivot;
+                localScale = rectTransform.localScale;
+            }
+        }
+
+        public static void RestoreFromBackup(this RectTransform rectTransform)
+        {
+            if (!_backupData.TryGetValue(rectTransform, out var backup)) return;
+            rectTransform.anchoredPosition = backup.anchoredPosition;
+            rectTransform.sizeDelta = backup.sizeDelta;
+            rectTransform.anchorMin = backup.anchorMin;
+            rectTransform.anchorMax = backup.anchorMax;
+            rectTransform.pivot = backup.pivot;
+            rectTransform.localScale = backup.localScale;
+        }
+
+        public static bool HasBackup(this RectTransform rectTransform) => _backupData.ContainsKey(rectTransform);
+        public static void ClearBackup(this RectTransform rectTransform) => _backupData.Remove(rectTransform); 
+        
+        public static void BackupState(this RectTransform rectTransform)
+        {
+            _backupData[rectTransform] = new RectTransformBackup(rectTransform);
+        }
+
+        private static Dictionary<RectTransform, RectTransformBackup> _backupData = new();
 
         public static void SetSize(this RectTransform rectTransform, float width, float height)
         {
@@ -77,84 +120,104 @@ namespace work.ctrl3d
             switch (anchor)
             {
                 case AnchorPreset.UseDefault:
+                    if (rectTransform.HasBackup()) rectTransform.RestoreFromBackup();
+                    else rectTransform.BackupState();
+
                     break;
 
                 case AnchorPreset.FullStretch:
+                    if (!rectTransform.HasBackup()) rectTransform.BackupState();
+
                     SetRectTransform(rectTransform, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f),
                         new Vector2(1f, 1f), new Vector2(0.5f, 0.5f));
                     break;
 
                 case AnchorPreset.TopStretch:
+                    if (!rectTransform.HasBackup()) rectTransform.BackupState();
                     SetRectTransform(rectTransform, new Vector2(0f, 0f), new Vector2(0f, rectTransform.sizeDelta.y),
                         new Vector2(0, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f));
                     break;
 
                 case AnchorPreset.MiddleStretch:
+                    if (!rectTransform.HasBackup()) rectTransform.BackupState();
                     SetRectTransform(rectTransform, new Vector2(0f, 0f), new Vector2(0f, rectTransform.sizeDelta.y),
                         new Vector2(0f, 0.5f), new Vector2(1f, 0.5f), new Vector2(0.5f, 0.5f));
                     break;
 
                 case AnchorPreset.BottomStretch:
+                    if (!rectTransform.HasBackup()) rectTransform.BackupState();
                     SetRectTransform(rectTransform, new Vector2(0f, 0f), new Vector2(0f, rectTransform.sizeDelta.y),
                         new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f));
                     break;
 
                 case AnchorPreset.LeftTop:
+                    if (!rectTransform.HasBackup()) rectTransform.BackupState();
                     SetRectTransform(rectTransform, new Vector2(0f, 0f), rectTransform.sizeDelta, new Vector2(0f, 1f),
                         new Vector2(0f, 1f), new Vector2(0f, 1f));
                     break;
 
                 case AnchorPreset.LeftCenter:
+                    if (!rectTransform.HasBackup()) rectTransform.BackupState();
                     SetRectTransform(rectTransform, new Vector2(0f, 0f), rectTransform.sizeDelta, new Vector2(0f, 0.5f),
                         new Vector2(0f, 0.5f), new Vector2(0f, 0.5f));
                     break;
 
                 case AnchorPreset.LeftBottom:
+                    if (!rectTransform.HasBackup()) rectTransform.BackupState();
                     SetRectTransform(rectTransform, new Vector2(0f, 0f), rectTransform.sizeDelta, new Vector2(0f, 0f),
                         new Vector2(0f, 0f), new Vector2(0f, 0f));
                     break;
 
                 case AnchorPreset.LeftStretch:
+                    if (!rectTransform.HasBackup()) rectTransform.BackupState();
                     SetRectTransform(rectTransform, new Vector2(0f, 0f), new Vector2(rectTransform.sizeDelta.x, 0f),
                         new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f));
                     break;
 
                 case AnchorPreset.CenterTop:
+                    if (!rectTransform.HasBackup()) rectTransform.BackupState();
                     SetRectTransform(rectTransform, new Vector2(0f, 0f), rectTransform.sizeDelta, new Vector2(0.5f, 1f),
                         new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
                     break;
 
                 case AnchorPreset.Center:
+                    if (!rectTransform.HasBackup()) rectTransform.BackupState();
                     SetRectTransform(rectTransform, new Vector2(0f, 0f), rectTransform.sizeDelta,
                         new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
                     break;
 
                 case AnchorPreset.CenterBottom:
+                    if (!rectTransform.HasBackup()) rectTransform.BackupState();
                     SetRectTransform(rectTransform, new Vector2(0f, 0f), rectTransform.sizeDelta, new Vector2(0.5f, 0f),
                         new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
                     break;
 
                 case AnchorPreset.CenterStretch:
+                    if (!rectTransform.HasBackup()) rectTransform.BackupState();
                     SetRectTransform(rectTransform, new Vector2(0f, 0f), new Vector2(rectTransform.sizeDelta.x, 0f),
                         new Vector2(0.5f, 0f), new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f));
                     break;
 
                 case AnchorPreset.RightTop:
+                    if (!rectTransform.HasBackup()) rectTransform.BackupState();
                     SetRectTransform(rectTransform, new Vector2(0f, 0f), rectTransform.sizeDelta, new Vector2(1f, 1f),
                         new Vector2(1f, 1f), new Vector2(1f, 1f));
                     break;
 
                 case AnchorPreset.RightCenter:
+                    if (!rectTransform.HasBackup()) rectTransform.BackupState();
                     SetRectTransform(rectTransform, new Vector2(0f, 0f), rectTransform.sizeDelta, new Vector2(1f, 0.5f),
                         new Vector2(1f, 0.5f), new Vector2(1f, 0.5f));
                     break;
 
                 case AnchorPreset.RightBottom:
+                    if (!rectTransform.HasBackup()) rectTransform.BackupState();
                     SetRectTransform(rectTransform, new Vector2(0f, 0f), rectTransform.sizeDelta, new Vector2(1f, 0f),
                         new Vector2(1f, 0f), new Vector2(1f, 0f));
                     break;
 
                 case AnchorPreset.RightStretch:
+                    if (!rectTransform.HasBackup()) rectTransform.BackupState();
                     SetRectTransform(rectTransform, new Vector2(0f, 0f), new Vector2(rectTransform.sizeDelta.x, 0f),
                         new Vector2(1f, 0f), new Vector2(1f, 1f), new Vector2(1f, 0.5f));
                     break;
