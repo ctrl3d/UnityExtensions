@@ -61,8 +61,8 @@ namespace work.ctrl3d
         }
 
         public static bool HasBackup(this RectTransform rectTransform) => _backupData.ContainsKey(rectTransform);
-        public static void ClearBackup(this RectTransform rectTransform) => _backupData.Remove(rectTransform); 
-        
+        public static void ClearBackup(this RectTransform rectTransform) => _backupData.Remove(rectTransform);
+
         public static void BackupState(this RectTransform rectTransform)
         {
             _backupData[rectTransform] = new RectTransformBackup(rectTransform);
@@ -122,6 +122,8 @@ namespace work.ctrl3d
                 case AnchorPreset.UseDefault:
                     if (rectTransform.HasBackup()) rectTransform.RestoreFromBackup();
                     else rectTransform.BackupState();
+
+                    rectTransform.ClearBackup();
 
                     break;
 
