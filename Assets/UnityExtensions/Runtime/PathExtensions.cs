@@ -36,12 +36,14 @@ namespace work.ctrl3d
                 Debug.LogError($"이미지 파일이 존재하지 않습니다: {fullPath}");
                 return null;
             }
-
+            
+            /*
             if (!fullPath.IsValidImagePath())
             {
                 Debug.LogError($"지원하지 않는 이미지 형식입니다: {Path.GetExtension(fullPath)}");
                 return null;
             }
+            */
 
             try
             {
