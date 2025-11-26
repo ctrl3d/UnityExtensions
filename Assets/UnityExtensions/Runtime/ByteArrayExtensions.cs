@@ -6,9 +6,23 @@ namespace work.ctrl3d
 {
     public static class ByteArrayExtensions
     {
-        // 16진수 문자열
-        public static string ToHexString(this byte[] bytes) =>
-            string.Join(" ", bytes.Select(b => b.ToString("X2")));
+        // 16진수 문자열 (StringBuilder 사용 최적화)
+        public static string ToHexString(this byte[] bytes)
+        {
+            if (bytes == null || bytes.Length == 0) return string.Empty;
+                
+            // 예상 길이 할당 (2글자 + 공백 1글자)
+            var sb = new StringBuilder(bytes.Length * 3);
+            foreach (var b in bytes)
+            {
+                sb.Append(b.ToString("X2")).Append(' ');
+            }
+                
+            // 마지막 공백 제거가 필요하다면
+            if (sb.Length > 0) sb.Length--;
+                
+            return sb.ToString();
+        }
 
         // 16진수 문자열 (구분자 없음)
         public static string ToHexStringCompact(this byte[] bytes) =>

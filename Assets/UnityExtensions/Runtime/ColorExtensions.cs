@@ -2,7 +2,7 @@
 
 namespace work.ctrl3d
 {
-    public static class ColorEx
+    public static class ColorExtensions
     {
         public static Color Aqua => new(0f, 1f, 1f, 1f);
         public static Color Brown => new(0.647f, 0.165f, 0.165f, 1f);
