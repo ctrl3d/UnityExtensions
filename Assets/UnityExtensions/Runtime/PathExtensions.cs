@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -132,17 +133,14 @@ namespace work.ctrl3d
         {
             if (!Directory.Exists(directoryPath) || extensions == null || extensions.Length == 0)
                 return Array.Empty<string>();
+            
+            var allowedExtensions = new HashSet<string>(extensions.Select(e => 
+                e.StartsWith(".") ? e.ToLower() : "." + e.ToLower()));
 
-            var files = new List<string>();
-
-            foreach (var extension in extensions)
-            {
-                // 확장자가 *로 시작하지 않으면 자동으로 추가
-                var searchPattern = extension.StartsWith("*") ? extension : $"*.{extension.TrimStart('.')}";
-                files.AddRange(Directory.GetFiles(directoryPath, searchPattern, searchOption));
-            }
-
-            return files.ToArray();
+            // 모든 파일을 한번 가져온 뒤 필터링
+            return Directory.GetFiles(directoryPath, "*", searchOption)
+                .Where(file => allowedExtensions.Contains(Path.GetExtension(file).ToLower()))
+                .ToArray();
         }
 
         /// <summary>
