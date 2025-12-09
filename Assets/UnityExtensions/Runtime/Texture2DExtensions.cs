@@ -24,7 +24,7 @@ namespace work.ctrl3d
             return readableText;
         }
     
-        public static Sprite Texture2DToSprite(Texture2D texture)
+        public static Sprite ToSprite(Texture2D texture)
         {
             var rect = new Rect(0, 0, texture.width, texture.height);
             var sprite = Sprite.Create(texture, rect, new Vector2(0.5f, 0.5f));
