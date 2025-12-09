@@ -1,60 +1,56 @@
 using System;
-using System.Linq;
 using System.Text;
+using UnityEngine;
+
+// Texture2D 사용을 위해 필요
 
 namespace work.ctrl3d
 {
     public static class ByteArrayExtensions
     {
-        // 16진수 문자열 (StringBuilder 사용 최적화)
-        public static string ToHexString(this byte[] bytes)
+        public static string ToHexString(this byte[] bytes, string separator = " ")
         {
             if (bytes == null || bytes.Length == 0) return string.Empty;
-                
-            // 예상 길이 할당 (2글자 + 공백 1글자)
-            var sb = new StringBuilder(bytes.Length * 3);
+            
+            var capacity = bytes.Length * (2 + separator.Length);
+            var sb = new StringBuilder(capacity);
+
             foreach (var b in bytes)
             {
-                sb.Append(b.ToString("X2")).Append(' ');
+                sb.Append(b.ToString("X2")).Append(separator);
             }
-                
-            // 마지막 공백 제거가 필요하다면
-            if (sb.Length > 0) sb.Length--;
-                
+            
+            if (separator.Length > 0 && sb.Length > 0)
+                sb.Length -= separator.Length;
+
             return sb.ToString();
         }
-
-        // 16진수 문자열 (구분자 없음)
-        public static string ToHexStringCompact(this byte[] bytes) =>
-            string.Concat(bytes.Select(b => b.ToString("X2")));
         
-        // 16진수와 ASCII를 함께 표시
         public static string ToHexDump(this byte[] bytes, int bytesPerLine = 16)
         {
+            if (bytes == null || bytes.Length == 0) return "<Empty>";
+
             var sb = new StringBuilder();
+            var length = bytes.Length;
 
-            for (var i = 0; i < bytes.Length; i += bytesPerLine)
+            for (var i = 0; i < length; i += bytesPerLine)
             {
-                // 주소 표시
                 sb.Append($"{i:X8}: ");
-
-                // 16진수 표시
-                var lineBytes = bytes.Skip(i).Take(bytesPerLine).ToArray();
-                foreach (var b in lineBytes)
+                
+                for (var j = 0; j < bytesPerLine; j++)
                 {
-                    sb.Append($"{b:X2} ");
+                    if (i + j < length)
+                        sb.Append($"{bytes[i + j]:X2} ");
+                    else
+                        sb.Append("   "); // 데이터가 없을 때 공백 채움
                 }
 
-                // 빈 공간 채우기
-                for (var j = lineBytes.Length; j < bytesPerLine; j++)
-                {
-                    sb.Append("   ");
-                }
-
-                // ASCII 표시
                 sb.Append("| ");
-                foreach (var b in lineBytes)
+                
+                for (var j = 0; j < bytesPerLine; j++)
                 {
+                    if (i + j >= length) continue;
+                    var b = bytes[i + j];
                     var c = b is >= 32 and <= 126 ? (char)b : '.';
                     sb.Append(c);
                 }
@@ -64,36 +60,58 @@ namespace work.ctrl3d
 
             return sb.ToString();
         }
-
-        // 숫자 배열로 표시
-        public static string ToNumberString(this byte[] bytes) =>
-            $"[{string.Join(", ", bytes.Select(b => b.ToString()))}]";
-
-        // 비트 문자열로 표시
-        public static string ToBinaryString(this byte[] bytes) =>
-            string.Join(" ", bytes.Select(b => Convert.ToString(b, 2).PadLeft(8, '0')));
-
-
-        // 상세 정보와 함께 표시
-        public static string ToDetailedString(this byte[] bytes, Encoding encoding = null)
+        
+        public static string ToDetailedString(this byte[] bytes)
         {
-            encoding ??= Encoding.UTF8;
-
+            if (bytes == null) return "null";
+            
             var sb = new StringBuilder();
-            sb.AppendLine($"Length: {bytes.Length} bytes");
-            sb.AppendLine($"Hex: {bytes.ToHexString()}");
+            sb.AppendLine($"[Byte Array Info] Length: {bytes.Length:N0} bytes");
 
+            sb.AppendLine(bytes.Length > 256
+                ? $"Head (First 256): {bytes.ToHexString().Substring(0, 256 * 3)}..."
+                : $"Hex: {bytes.ToHexString()}");
+            
             try
             {
-                var text = encoding.GetString(bytes);
-                sb.AppendLine($"Text ({encoding.EncodingName}): \"{text}\"");
+                var utf8Text = Encoding.UTF8.GetString(bytes);
+                // 제어 문자가 너무 많으면 텍스트가 아닐 확률이 높음 (간단 체크)
+                if (!string.IsNullOrEmpty(utf8Text) && utf8Text.Length < 1000) 
+                    sb.AppendLine($"Text (UTF8): \"{utf8Text}\"");
             }
             catch
             {
-                sb.AppendLine("Text: [Binary data - cannot decode as text]");
+                // ignored
             }
 
             return sb.ToString();
+        }
+        
+        /// <summary>
+        /// 바이트 배열을 Base64 문자열로 빠르게 변환합니다. (API 전송용)
+        /// </summary>
+        public static string ToBase64(this byte[] bytes)
+        {
+            if (bytes == null) return null;
+            return Convert.ToBase64String(bytes);
+        }
+
+        /// <summary>
+        /// 바이트 배열을 Unity Texture2D로 변환합니다. (이미지 수신용)
+        /// </summary>
+        public static Texture2D ToTexture2D(this byte[] bytes)
+        {
+            if (bytes == null || bytes.Length == 0) return null;
+            
+            var tex = new Texture2D(2, 2);
+            if (tex.LoadImage(bytes))
+            {
+                tex.Apply();
+                return tex;
+            }
+            
+            UnityEngine.Object.Destroy(tex);
+            return null;
         }
     }
 }
